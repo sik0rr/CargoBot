@@ -12,7 +12,6 @@ public class Main {
 
             // Register your newly created AbilityBot
             botsApi.registerBot(new CargoBot());
-
         } catch (TelegramApiException e) {
             e.printStackTrace();
         }

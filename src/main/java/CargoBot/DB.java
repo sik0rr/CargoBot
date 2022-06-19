@@ -29,8 +29,8 @@ public class DB {
         }
         return temporary;
     }
-    public static void push(String statement){
-        System.out.println(statement);
+
+    public static void push(String statement) {
         try {
             Class.forName("com.mysql.cj.jdbc.Driver").getDeclaredConstructor().newInstance();
             Connection conn = DriverManager.getConnection("jdbc:mysql://localhost/cargodb", "root", "sikora2001");
@@ -42,36 +42,39 @@ public class DB {
             System.out.println(ex);
         }
     }
-   // static List<String> searchResult = new ArrayList<>();
-    public static void get(String statement){
+
+    // static List<String> searchResult = new ArrayList<>();
+    public static List<String> get(String statement) {
+        List<String> searchResult = new ArrayList<>();
         try {
-            List<String> searchResult = new ArrayList<>();
             Class.forName("com.mysql.cj.jdbc.Driver").getDeclaredConstructor().newInstance();
             Connection conn = DriverManager.getConnection("jdbc:mysql://localhost/cargodb", "root", "sikora2001");
             PreparedStatement ps = conn.prepareStatement(statement);
             ResultSet rs = ps.executeQuery();
-            System.out.println(rs);
-            while (rs.next()){
+            while (rs.next()) {
                 int nomer = rs.getInt("id");
                 String otkuda = rs.getString("whereFrom");
                 String kuda = rs.getString("whereTo");
                 double tsena = rs.getDouble("price");
                 double ves = rs.getDouble("weight");
                 double objem = rs.getDouble("size");
-                String telefon = rs.getString("phone");
                 String comment = rs.getString("commentary");
                 String data = rs.getDate("addDate").toString();
-                String result = "\nНомер груза:" +nomer+"\nОткуда: " + otkuda +"\nКуда: " +kuda+"\nЦена: "+tsena+"руб\nВес: "+ves+" т\nОбъём: "+objem+"м³\nДата добавления: "+ data +
-                        "\nКомментарий: " + comment + "\nТелефон:" +telefon+"\n"+"Телефон администрации: +79375845056";
+                String result = "\nНомер груза:" + nomer + "\nОткуда: " + otkuda + "\nКуда: " + kuda + "\nЦена: " + tsena + "руб\nВес: " + ves + " т\nОбъём: " + objem + "м³\nДата добавления: " + data +
+                        "\nКомментарий: " + comment + "\n" + "Телефон администрации: +79375845056\n";
+                result = result.replace("[", "");
+                result = result.replace("]", "");
                 searchResult.add(result);
+                System.out.println(result);
             }
-            CargoBot.getSearchResult(searchResult);
-            searchResult.clear();
+            //CargoBot.getSearchResult(searchResult);
+            //searchResult.clear();
             rs.close();
             conn.close();
         } catch (SQLException | ClassNotFoundException | NoSuchMethodException | InstantiationException | IllegalAccessException | InvocationTargetException ex) {
             System.out.println("Connection failed...");
             System.out.println(ex);
         }
+        return searchResult;
     }
 }

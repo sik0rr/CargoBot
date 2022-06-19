@@ -19,7 +19,7 @@ import java.util.Date;
 import java.util.*;
 
 public class CargoBot extends TelegramLongPollingSessionBot {
-    static String resultList = new String();
+    //    static String[] resultList = DB.get();
 //        ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup();
 //        List<KeyboardRow> keyboard = new ArrayList<>();
     Map<String, Integer> userlist = DB.userGet();
@@ -29,51 +29,55 @@ public class CargoBot extends TelegramLongPollingSessionBot {
         Message message = update.getMessage();
         Session session = optional.get();
         session.setTimeout(600000);
-        System.out.println(session.getAttributeKeys());
         if (message != null && message.hasText() && session.getAttribute("statement") != null) {
             ReplyKeyboardMarkup keyboard = new ReplyKeyboardMarkup();
             switch (session.getAttribute("statement").toString()) {
                 case "Откуда":
-                    //whereFrom = message.getText();
+                    keyboard = createKeyboard("Откуда,Куда;Вес,Объём;Цена,Комментарий;Добавить,На главную", false);
                     session.setAttribute("whereFrom", message.getText());
-                    System.out.println(session.getAttribute("whereFrom"));
+                    sendMsg(message, "Город отправления записан", keyboard);
                     session.removeAttribute("statement");
                     break;
                 case "Куда":
+                    keyboard = createKeyboard("Откуда,Куда;Вес,Объём;Цена,Комментарий;Добавить,На главную", false);
                     session.setAttribute("whereTo", message.getText());
-                    System.out.println(session.getAttribute("whereTo"));
+                    sendMsg(message, "Город назначения записан", keyboard);
                     session.removeAttribute("statement");
                     break;
                 case "Вес":
+                    keyboard = createKeyboard("Откуда,Куда;Вес,Объём;Цена,Комментарий;Добавить,На главную", false);
                     session.setAttribute("weight", message.getText());
-                    System.out.println(session.getAttribute("weight"));
+                    sendMsg(message, "Вес записан", keyboard);
                     session.removeAttribute("statement");
                     break;
-                case "Контактный телефон":
-                    session.setAttribute("phone", message.getText());
-                    System.out.println(session.getAttribute("phone"));
-                    session.removeAttribute("statement");
-                    break;
+//                case "Контактный телефон":
+//                    session.setAttribute("phone", message.getText());
+//                    session.removeAttribute("statement");
+//                    keyboard = createKeyboard("Откуда,Куда;Вес,Объём;Цена,Контактный телефон;Комментарий,Добавить;На главную", false);
+//                    sendMsg(message, "Контактный телефон записан", keyboard);
+//                    break;
                 case "Цена":
+                    keyboard = createKeyboard("Откуда,Куда;Вес,Объём;Цена,Комментарий;Добавить,На главную", false);
                     session.setAttribute("price", message.getText());
-                    System.out.println(session.getAttribute("price"));
                     session.removeAttribute("statement");
+                    sendMsg(message, "Цена записана", keyboard);
                     break;
                 case "Объём":
+                    keyboard = createKeyboard("Откуда,Куда;Вес,Объём;Цена,Комментарий;Добавить,На главную", false);
                     session.setAttribute("size", message.getText());
-                    System.out.println(session.getAttribute("size"));
                     session.removeAttribute("statement");
+                    sendMsg(message, "Объём записан", keyboard);
                     break;
                 case "Комментарий":
+                    keyboard = createKeyboard("Откуда,Куда;Вес,Объём;Цена,Комментарий;Добавить,На главную", false);
                     session.setAttribute("commentary", message.getText());
-                    System.out.println(session.getAttribute("commentary"));
                     session.removeAttribute("statement");
+                    sendMsg(message, "Комментарий записан", keyboard);
                     break;
                 case "Добавить пользователя":
-//                    session.setAttribute("userToAdd", message.getText());
                     if (!(message.getText().contains("@"))) {
                         keyboard = createKeyboard("На главную");
-                        sendMsg(message, "Имя пользователя введено неправильно",keyboard);
+                        sendMsg(message, "Имя пользователя введено неправильно", keyboard);
                         session.removeAttribute("statement");
                         break;
                     }
@@ -100,37 +104,87 @@ public class CargoBot extends TelegramLongPollingSessionBot {
                     break;
                 case "ПоискОткуда":
                     session.setAttribute("searchFrom", message.getText());
-                    String sql = String.format(Locale.ROOT, "SELECT * FROM cargolist WHERE whereFrom = '%s'", session.getAttribute("searchFrom").toString());
+                    String sql4 = String.format(Locale.ROOT, "SELECT * FROM cargolist WHERE whereFrom = '%s'", session.getAttribute("searchFrom").toString());
                     //String sql = "SELECT * FROM cargolist WHERE whereFrom =" + whereFrom
-                    DB.get(sql);
-                    System.out.println(resultList + " : " + resultList.length());
-                    keyboard = createKeyboard("Добавить груз;Искать груз;Управление доступом");
-                    if (resultList.length() > 2) {
-                        System.out.println("иф");
-                        sendMsg(message, resultList, keyboard);
-                        session.removeAttribute("searchFrom");
-                        session.removeAttribute("statement");
-                    } else {
-                        System.out.println("элс");
-                        sendMsg(message, "По Вашему запросу не найдено ни одного груза", keyboard);
+                    keyboard = createKeyboard("На главную");
+                    System.out.println("Поиск откуда");
+                    String[] resultList = getSearchResult(sql4);
+                    if (resultList.length >0 && !(resultList[0].isBlank())) {
+                        for (String result:resultList) {
+                            sendMsg(message, result);
+                        }
+                        sendMsg(message, "Поиск завершен", keyboard);
                         session.removeAttribute("searchFrom");
                         session.removeAttribute("statement");
                     }
-
+                    else {
+                        sendMsg(message, "По Вашему запросу не найдено ни одного груза", keyboard);
+                        session.removeAttribute("searchFrom");
+                        session.removeAttribute("statement");
+                        break;
+                    }
                     break;
                 case "ПоискКуда":
                     session.setAttribute("searchTo", message.getText());
                     String sql1 = String.format(Locale.ROOT, "SELECT * FROM cargolist WHERE whereTo = '%s'", session.getAttribute("searchTo").toString());
-                    System.out.println(sql1);
                     DB.get(sql1);
-                    keyboard = createKeyboard("Добавить груз;Искать груз;Управление доступом");
-                    if (resultList.length() > 2) {
-                        sendMsg(message, resultList,keyboard);
+                    keyboard = createKeyboard("На главную");
+                    System.out.println("Поиск куда");
+                    String[] resultList1 = getSearchResult(sql1);
+                    if (resultList1.length >0 && !(resultList1[0].isBlank())) {
+                        for (String result : resultList1) {
+                            sendMsg(message, result);
+                        }
+                        sendMsg(message, "Поиск завершен", keyboard);
                         session.removeAttribute("searchTo");
                         session.removeAttribute("statement");
                     } else {
                         sendMsg(message, "По Вашему запросу не найдено ни одного груза", keyboard);
                         session.removeAttribute("searchTo");
+                        session.removeAttribute("statement");
+                    }
+                    break;
+                case "ПоискЮзернейм":
+                    session.setAttribute("username", message.getText().substring(1));
+                    String sql2 = String.format(Locale.ROOT, "SELECT * FROM cargolist WHERE username = '%s'", session.getAttribute("username").toString());
+                    DB.get(sql2);
+                    System.out.println("Поиск юзернейм");
+                    keyboard = createKeyboard("На главную");
+                    String[] resultList2 = getSearchResult(sql2);
+                    if (resultList2.length >0 && !(resultList2[0].isBlank())) {
+                        for (String result : resultList2) {
+                            sendMsg(message, result);
+                        }
+                        sendMsg(message, "Поиск завершен", keyboard);
+                        session.removeAttribute("username");
+                        session.removeAttribute("statement");
+                    } else {
+                        sendMsg(message, "По Вашему запросу не найдено ни одного груза", keyboard);
+                        session.removeAttribute("username");
+                        session.removeAttribute("statement");
+                    }
+                    break;
+                case "ПоискДата":
+                    String[] dateRange = message.getText().split(":");
+                    session.setAttribute("date1", dateRange[0].replace(".", "-"));
+                    session.setAttribute("date2", dateRange[1].replace(".", "-"));
+                    System.out.println("Поиск даты");
+                    String sql3 = String.format(Locale.ROOT, "SELECT * FROM cargolist WHERE addDate BETWEEN '%s' AND '%s'", session.getAttribute("date1"), session.getAttribute("date2"));
+                    DB.get(sql3);
+                    keyboard = createKeyboard("На главную");
+                    String[] resultList3 = getSearchResult(sql3);
+                    if (resultList3.length >0 && !(resultList3[0].isBlank())) {
+                        for (String result:resultList3) {
+                            sendMsg(message, result);
+                        }
+                        sendMsg(message, "Поиск завершен", keyboard);
+                        session.removeAttribute("date1");
+                        session.removeAttribute("date2");
+                        session.removeAttribute("statement");
+                    } else {
+                        sendMsg(message, "По Вашему запросу не найдено ни одного груза", keyboard);
+                        session.removeAttribute("date1");
+                        session.removeAttribute("date2");
                         session.removeAttribute("statement");
                     }
                     break;
@@ -146,19 +200,19 @@ public class CargoBot extends TelegramLongPollingSessionBot {
                     sendMsg(message, "Добрый день! Вас приветствует CargoBot.", keyboard);
                     break;
                 case "Добавить груз":
+                    System.out.println("Попытка добавить груз");
                     if (!(userlist.containsKey(session.getHost()) && (userlist.get(session.getHost()) < 3))) {
                         keyboard = createKeyboard("На главную");
-                        sendMsg(message, "У вас недостаточно прав, чтобы добавить груз. Чтобы получить одобрение, обратитесь к администратору: @samara_121 или по телефону +79375845056",keyboard);
+                        sendMsg(message, "У вас недостаточно прав, чтобы добавить груз. Чтобы получить одобрение, обратитесь к администратору: @samara_121 или по телефону +79375845056", keyboard);
                         break;
                     }
-                    keyboard = createKeyboard("Откуда,Куда;Вес,Объём;Цена,Контактный телефон;Комментарий,Добавить", true);
+                    keyboard = createKeyboard("Откуда,Куда;Вес,Объём;Цена,Комментарий;Добавить,На главную", false);
                     sendMsg(message, "Нажмите нужную кнопку и введите информацию. После того, как Вы введете все данные, нажмите кнопку 'Добавить'.", keyboard);
                     break;
                 case "Откуда":
                     session.setAttribute("statement", "Откуда");
                     sendMsg(message, "Введите название населенного пункта, из которого надо забрать груз");
                     break;
-
                 case "Куда":
                     session.setAttribute("statement", "Куда");
                     sendMsg(message, "Введите название населенного пункта, в который надо доставить груз");
@@ -167,10 +221,10 @@ public class CargoBot extends TelegramLongPollingSessionBot {
                     session.setAttribute("statement", "Вес");
                     sendMsg(message, "Введите вес груза в тоннах(только число)");
                     break;
-                case "Контактный телефон":
-                    session.setAttribute("statement", "Контактный телефон");
-                    sendMsg(message, "Введите свой контактный телефон");
-                    break;
+//                case "Контактный телефон":
+//                    session.setAttribute("statement", "Контактный телефон");
+//                    sendMsg(message, "Введите свой контактный телефон");
+//                    break;
                 case "Цена":
                     session.setAttribute("statement", "Цена");
                     sendMsg(message, "Введите сумму, которую получит грузоперевозчик после перевозки груза(в рублях)");
@@ -184,20 +238,18 @@ public class CargoBot extends TelegramLongPollingSessionBot {
                     sendMsg(message, "Введите свой комментарий к грузу, например - точный адрес места, где находится груз и куда его надо доставить");
                     break;
                 case "Управление доступом":
-                    System.out.println(session.getHost());
-                    System.out.println(userlist.keySet());
                     if (!(userlist.containsKey(session.getHost()) && (userlist.get(session.getHost()) < 2))) {
                         keyboard = createKeyboard("На главную");
-                        sendMsg(message, "У вас недостаточно прав.",keyboard);
+                        sendMsg(message, "У вас недостаточно прав.", keyboard);
                         break;
                     }
                     keyboard = createKeyboard("Добавить пользователя,Удалить пользователя;Список пользователей,На главную");
-                    sendMsg(message, "Выберите действие.",keyboard);
+                    sendMsg(message, "Выберите действие.", keyboard);
                     break;
                 case "На главную":
                     session.removeAttribute("statement");
-                   keyboard = createKeyboard("Добавить груз;Искать груз;Управление доступом");
-                    sendMsg(message, "Добрый день! Вас приветствует CargoBot. ",keyboard);
+                    keyboard = createKeyboard("Добавить груз;Искать груз;Управление доступом");
+                    sendMsg(message, "Добрый день! Вас приветствует CargoBot. ", keyboard);
                     break;
                 case "Добавить пользователя":
                     session.setAttribute("statement", "Добавить пользователя");
@@ -214,31 +266,32 @@ public class CargoBot extends TelegramLongPollingSessionBot {
                     out = out.replace("}", "");
                     out = out.replace("=2", ": может добавлять грузы");
                     out = out.replace("=1", ": администратор");
-                    System.out.println(out);
                     sendMsg(message, out);
                     break;
                 case "Добавить":
                     Date date = new Date();
-                    SimpleDateFormat pattern = new SimpleDateFormat("dd.MM.yyyy");
+                    SimpleDateFormat pattern = new SimpleDateFormat("yyyy.MM.dd");
                     session.setAttribute("date", pattern.format(date));
-                    System.out.println(session.getAttribute("date"));
-                    String sql = String.format(Locale.ROOT, "INSERT INTO cargolist (whereFrom, whereTo, price, weight, username, phone, size, commentary, addDate) VALUES ('%s', '%s', %.0f, %4.1f, '%s', '%s', %4.1f, '%s', '%s')",
+                    String sql = String.format(Locale.ROOT, "INSERT INTO cargolist (whereFrom, whereTo, price, weight, username, size, commentary, addDate) VALUES ('%s', '%s', %.0f, %4.1f, '%s', %4.1f, '%s', '%s')",
                             session.getAttribute("whereFrom"), session.getAttribute("whereTo"), Double.parseDouble(session.getAttribute("price").toString()),
-                            Double.parseDouble(session.getAttribute("weight").toString()), session.getHost(), session.getAttribute("phone"), Double.parseDouble(session.getAttribute("size").toString()),
+                            Double.parseDouble(session.getAttribute("weight").toString()), session.getHost(), Double.parseDouble(session.getAttribute("size").toString()),
                             session.getAttribute("commentary"), session.getAttribute("date"));
-                    System.out.println(sql);
                     DB.push(sql);
                     keyboard = createKeyboard("На главную");
+                    System.out.println("Попытка добавить груз: \nОткуда: " + session.getAttribute("whereFrom") + "\nКуда: " + session.getAttribute("whereTo") +
+                            "\nЦена: " + session.getAttribute("price") + "\nВес: " + session.getAttribute("weight") +
+                            "\nОбъём: " + session.getAttribute("size") + "\nИмя пользователя: " + session.getHost() +
+                            "\nДата добавления груза: " + session.getAttribute("date") + "\nКомментарий: " + session.getAttribute("commentary")+"\nТелефон администрации: +79375845056");
                     sendMsg(message, "Груз добавлен: \nОткуда: " + session.getAttribute("whereFrom") + "\nКуда: " + session.getAttribute("whereTo") +
                             "\nЦена: " + session.getAttribute("price") + "\nВес: " + session.getAttribute("weight") +
-                            "\nОбъём: " + session.getAttribute("size") + "\nИмя пользователя: " + session.getHost() + "\nКонтактный телефон: " + session.getAttribute("phone") +
-                            "\nДата добавления груза: " + session.getAttribute("date") + "\nКомментарий: " + session.getAttribute("commentary")+"Телефон администрации: +79375845056",keyboard);
+                            "\nОбъём: " + session.getAttribute("size") + "\nИмя пользователя: " + session.getHost() +
+                            "\nДата добавления груза: " + session.getAttribute("date") + "\nКомментарий: " + session.getAttribute("commentary") + "\nТелефон администрации: +79375845056", keyboard);
+                    sendMsg("Груз добавлен пользователем: " + session.getHost(), 383458909);
                     session.stop();
                     break;
                 case "Искать груз":
-                   keyboard = createKeyboard("Искать по городу отправления,Искать по городу назначения");
-
-                    sendMsg(message, "По какому критерию искать груз?",keyboard);
+                    keyboard = createKeyboard("Искать по городу отправления,Искать по городу назначения;Искать по имени пользователя,Искать по дате");
+                    sendMsg(message, "По какому критерию искать груз?", keyboard);
                     break;
                 case "Искать по городу отправления":
                     session.setAttribute("statement", "ПоискОткуда");
@@ -247,6 +300,14 @@ public class CargoBot extends TelegramLongPollingSessionBot {
                 case "Искать по городу назначения":
                     session.setAttribute("statement", "ПоискКуда");
                     sendMsg(message, "Введите название города, в который надо доставить груз");
+                    break;
+                case "Искать по имени пользователя":
+                    session.setAttribute("statement", "ПоискЮзернейм");
+                    sendMsg(message, "Введите имя пользователя в формате @username");
+                    break;
+                case "Искать по дате":
+                    session.setAttribute("statement", "ПоискДата");
+                    sendMsg(message, "Введите временной диапазон в формате ГГГГ.ММ.ДД:ГГГГ.ММ.ДД");
                     break;
 
             }
@@ -262,18 +323,18 @@ public class CargoBot extends TelegramLongPollingSessionBot {
         List<KeyboardRow> keyboard = new ArrayList<>();
         KeyboardRow keyboardRow = new KeyboardRow();
         String[] rowButtons = text.split(";");
-        for (String line:rowButtons) {
+        for (String line : rowButtons) {
             String[] buttons = line.split(",");
-            for (String button:buttons) {
+            for (String button : buttons) {
                 keyboardRow.add(button);
             }
             keyboard.add(keyboardRow);
             keyboardRow = new KeyboardRow();
         }
-        System.out.println(keyboard);
         replyKeyboardMarkup.setKeyboard(keyboard);
         return replyKeyboardMarkup;
     }
+
     public ReplyKeyboardMarkup createKeyboard(String text, Boolean oneTime) {
         ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup();
         replyKeyboardMarkup.setSelective(true);
@@ -283,15 +344,14 @@ public class CargoBot extends TelegramLongPollingSessionBot {
         List<KeyboardRow> keyboard = new ArrayList<>();
         KeyboardRow keyboardRow = new KeyboardRow();
         String[] rowButtons = text.split(";");
-        for (String line:rowButtons) {
+        for (String line : rowButtons) {
             String[] buttons = line.split(",");
-            for (String button:buttons) {
+            for (String button : buttons) {
                 keyboardRow.add(button);
             }
             keyboard.add(keyboardRow);
             keyboardRow = new KeyboardRow();
         }
-        System.out.println(keyboard);
         replyKeyboardMarkup.setKeyboard(keyboard);
         return replyKeyboardMarkup;
     }
@@ -307,8 +367,13 @@ public class CargoBot extends TelegramLongPollingSessionBot {
     }
 
 
-    public static void getSearchResult(List<String> list) {
-        resultList = list.toString();
+    public static String[] getSearchResult(String sql) {
+        String rawResultList = DB.get(sql).toString();
+        rawResultList = rawResultList.replace("]", "");
+        rawResultList = rawResultList.replace("[", "");
+        String[] resultList = rawResultList.split(",");
+        System.out.println(Arrays.toString(resultList));
+        return resultList;
     }
 
     public void sendMsg(Message message, String text, ReplyKeyboardMarkup replyKeyboardMarkup) {
@@ -317,13 +382,13 @@ public class CargoBot extends TelegramLongPollingSessionBot {
         sendMessage.setReplyMarkup(replyKeyboardMarkup);
         sendMessage.setChatId(message.getChatId().toString());
         sendMessage.setText(text);
-        System.out.println(text);
         try {
             execute(sendMessage);
         } catch (TelegramApiException e) {
             e.printStackTrace();
         }
     }
+
     public void sendMsg(Message message, String text) {
         SendMessage sendMessage = new SendMessage();
         sendMessage.enableMarkdown(false);
@@ -336,5 +401,18 @@ public class CargoBot extends TelegramLongPollingSessionBot {
             e.printStackTrace();
         }
     }
+
+    public void sendMsg(String text, int chatId) {
+        SendMessage sendMessage = new SendMessage();
+        sendMessage.enableMarkdown(false);
+        sendMessage.setChatId(String.valueOf(chatId));
+        sendMessage.setText(text);
+        try {
+            execute(sendMessage);
+        } catch (TelegramApiException e) {
+            e.printStackTrace();
+        }
+    }
 }
+
 
