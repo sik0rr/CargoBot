@@ -33,19 +33,19 @@ public class CargoBot extends TelegramLongPollingSessionBot {
             ReplyKeyboardMarkup keyboard = new ReplyKeyboardMarkup();
             switch (session.getAttribute("statement").toString()) {
                 case "Откуда":
-                    keyboard = createKeyboard("Откуда,Куда;Вес,Объём;Цена,Комментарий;Добавить,На главную", false);
+                    keyboard = createKeyboard("Откуда,Куда;Вес,Объём;Цена,Комментарий;Добавить,На главную", true);
                     session.setAttribute("whereFrom", message.getText());
                     sendMsg(message, "Город отправления записан", keyboard);
                     session.removeAttribute("statement");
                     break;
                 case "Куда":
-                    keyboard = createKeyboard("Откуда,Куда;Вес,Объём;Цена,Комментарий;Добавить,На главную", false);
+                    keyboard = createKeyboard("Откуда,Куда;Вес,Объём;Цена,Комментарий;Добавить,На главную", true);
                     session.setAttribute("whereTo", message.getText());
                     sendMsg(message, "Город назначения записан", keyboard);
                     session.removeAttribute("statement");
                     break;
                 case "Вес":
-                    keyboard = createKeyboard("Откуда,Куда;Вес,Объём;Цена,Комментарий;Добавить,На главную", false);
+                    keyboard = createKeyboard("Откуда,Куда;Вес,Объём;Цена,Комментарий;Добавить,На главную", true);
                     session.setAttribute("weight", message.getText());
                     sendMsg(message, "Вес записан", keyboard);
                     session.removeAttribute("statement");
@@ -57,19 +57,19 @@ public class CargoBot extends TelegramLongPollingSessionBot {
 //                    sendMsg(message, "Контактный телефон записан", keyboard);
 //                    break;
                 case "Цена":
-                    keyboard = createKeyboard("Откуда,Куда;Вес,Объём;Цена,Комментарий;Добавить,На главную", false);
+                    keyboard = createKeyboard("Откуда,Куда;Вес,Объём;Цена,Комментарий;Добавить,На главную", true);
                     session.setAttribute("price", message.getText());
                     session.removeAttribute("statement");
                     sendMsg(message, "Цена записана", keyboard);
                     break;
                 case "Объём":
-                    keyboard = createKeyboard("Откуда,Куда;Вес,Объём;Цена,Комментарий;Добавить,На главную", false);
+                    keyboard = createKeyboard("Откуда,Куда;Вес,Объём;Цена,Комментарий;Добавить,На главную", true);
                     session.setAttribute("size", message.getText());
                     session.removeAttribute("statement");
                     sendMsg(message, "Объём записан", keyboard);
                     break;
                 case "Комментарий":
-                    keyboard = createKeyboard("Откуда,Куда;Вес,Объём;Цена,Комментарий;Добавить,На главную", false);
+                    keyboard = createKeyboard("Откуда,Куда;Вес,Объём;Цена,Комментарий;Добавить,На главную", true);
                     session.setAttribute("commentary", message.getText());
                     session.removeAttribute("statement");
                     sendMsg(message, "Комментарий записан", keyboard);
@@ -206,7 +206,7 @@ public class CargoBot extends TelegramLongPollingSessionBot {
                         sendMsg(message, "У вас недостаточно прав, чтобы добавить груз. Чтобы получить одобрение, обратитесь к администратору: @samara_121 или по телефону +79375845056", keyboard);
                         break;
                     }
-                    keyboard = createKeyboard("Откуда,Куда;Вес,Объём;Цена,Комментарий;Добавить,На главную", false);
+                    keyboard = createKeyboard("Откуда,Куда;Вес,Объём;Цена,Комментарий;Добавить,На главную", true);
                     sendMsg(message, "Нажмите нужную кнопку и введите информацию. После того, как Вы введете все данные, нажмите кнопку 'Добавить'.", keyboard);
                     break;
                 case "Откуда":
