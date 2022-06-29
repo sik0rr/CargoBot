@@ -13,7 +13,7 @@ public class DB {
         Map<String, Integer> temporary = new HashMap<>();
         try {
             Class.forName("com.mysql.cj.jdbc.Driver").getDeclaredConstructor().newInstance();
-            Connection conn = DriverManager.getConnection("jdbc:mysql://localhost/cargodb", "root", "sikora2001");
+            Connection conn = DriverManager.getConnection("jdbc:mysql://mysql/cargodb", "root", "sikora2001");
             PreparedStatement ps = conn.prepareStatement("SELECT username, `group` FROM userlist");
             ResultSet resultSet = ps.executeQuery();
             while (resultSet.next()) {
