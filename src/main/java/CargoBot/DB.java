@@ -33,7 +33,7 @@ public class DB {
     public static void push(String statement) {
         try {
             Class.forName("com.mysql.cj.jdbc.Driver").getDeclaredConstructor().newInstance();
-            Connection conn = DriverManager.getConnection("jdbc:mysql://localhost/cargodb", "root", "sikora2001");
+            Connection conn = DriverManager.getConnection("jdbc:mysql://mysql/cargodb", "root", "sikora2001");
             PreparedStatement ps = conn.prepareStatement(statement);
             ps.execute();
             conn.close();
@@ -48,7 +48,7 @@ public class DB {
         List<String> searchResult = new ArrayList<>();
         try {
             Class.forName("com.mysql.cj.jdbc.Driver").getDeclaredConstructor().newInstance();
-            Connection conn = DriverManager.getConnection("jdbc:mysql://localhost/cargodb", "root", "sikora2001");
+            Connection conn = DriverManager.getConnection("jdbc:mysql://mysql/cargodb", "root", "sikora2001");
             PreparedStatement ps = conn.prepareStatement(statement);
             ResultSet rs = ps.executeQuery();
             while (rs.next()) {
