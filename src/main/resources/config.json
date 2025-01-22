@@ -1,0 +1,7 @@
+{
+	"botToken": "5307814884:AAESlq09cj50Nzh4cuyTRr6nzeTIu8SDTAc",
+	"botUsername": "@Sikor_CargoBot",
+	"dbUrl": "jdbc:postgresql://localhost/cargodb",
+	"dbUser": "postgres",
+	"dbPassword": "sikora2001"
+}
