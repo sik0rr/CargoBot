@@ -16,17 +16,15 @@ import java.util.*;
 public class CargoBot extends TelegramLongPollingSessionBot {
 
     private final DataBase dataBase;
-    private final String TOKEN;
-    private final String BOTUSERNAME;
+    private final String TOKEN = System.getenv("botToken");
+    private final String BOTUSERNAME = System.getenv("botUsername");
 
     private final ReplyKeyboardMarkup mainKeyboard = createKeyboard("Добавить груз,Искать груз;Управление доступом,Удалить груз;Мой рейтинг");
     private final ReplyKeyboardMarkup returnKeyboard = createKeyboard("На главную");
     private final ReplyKeyboardMarkup accessManageKeyboard = createKeyboard("Добавить пользователя,Удалить пользователя;Список пользователей,Обновить рейтинг;На главную");
     private final ReplyKeyboardMarkup searchKeyboard = createKeyboard("Показать все заявки;Искать по городу отправления,Искать по городу назначения;Искать по имени пользователя,Искать по дате; На главную");
 
-    public CargoBot(DataBase dataBase, Map<String, String> config) {
-        this.TOKEN = config.get("botToken");
-        this.BOTUSERNAME = config.get("botUsername");
+    public CargoBot(DataBase dataBase) {
         this.dataBase = dataBase;
     }
 

@@ -12,13 +12,11 @@ import java.util.Map;
 public class Main {
     public static void main(String[] args) {
         try {
-            ConfigParser parser = new ConfigParser("src/main/resources/config.json");
-            Map<String, String> config = parser.getConfig();
-            Connection conn = DriverManager.getConnection(config.get("dbUrl"), config.get("dbUser"), config.get("dbPassword"));
+            Connection conn = DriverManager.getConnection(System.getenv("dbUrl"), System.getenv("dbUser"), System.getenv("dbPassword"));
             Class.forName("org.postgresql.Driver");
             DataBase db = new DataBase(conn);
             TelegramBotsApi botsApi = new TelegramBotsApi(DefaultBotSession.class);
-            botsApi.registerBot(new CargoBot(db, config));
+            botsApi.registerBot(new CargoBot(db));
         } catch (TelegramApiException e) {
             e.printStackTrace();
         } catch (ClassNotFoundException | SQLException e) {
